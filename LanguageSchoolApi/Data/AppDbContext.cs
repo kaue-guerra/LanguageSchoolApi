@@ -11,5 +11,6 @@ namespace LanguageSchoolApi.Data
 
         public DbSet<Student> Students { get; set; }
         public DbSet<Course> Courses { get; set; }
+        public DbSet<Matriculate> Matriculates { get; set; }
     }
 }

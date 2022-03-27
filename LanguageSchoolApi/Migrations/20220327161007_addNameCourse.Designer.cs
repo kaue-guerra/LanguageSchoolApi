@@ -4,6 +4,7 @@ using LanguageSchoolApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LanguageSchoolApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220327161007_addNameCourse")]
+    partial class addNameCourse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,10 +40,15 @@ namespace LanguageSchoolApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("StudentId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Year")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
 
                     b.ToTable("Courses");
                 });
@@ -62,12 +69,7 @@ namespace LanguageSchoolApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("StudentId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
 
                     b.ToTable("Matriculates");
                 });
@@ -99,16 +101,16 @@ namespace LanguageSchoolApi.Migrations
                     b.ToTable("Students");
                 });
 
-            modelBuilder.Entity("LanguageSchoolApi.Models.Matriculate", b =>
+            modelBuilder.Entity("LanguageSchoolApi.Models.Course", b =>
                 {
                     b.HasOne("LanguageSchoolApi.Models.Student", null)
-                        .WithMany("CoursesMatriculates")
+                        .WithMany("CoursesStudents")
                         .HasForeignKey("StudentId");
                 });
 
             modelBuilder.Entity("LanguageSchoolApi.Models.Student", b =>
                 {
-                    b.Navigation("CoursesMatriculates");
+                    b.Navigation("CoursesStudents");
                 });
 #pragma warning restore 612, 618
         }
