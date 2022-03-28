@@ -2,13 +2,18 @@
 
 namespace LanguageSchoolApi.Validators
 {
-    public class StudentValidation
+    public class MatriculateValidation
     {
         private readonly AppDbContext _context;
 
-        public StudentValidation(AppDbContext appDbContext)
+        public MatriculateValidation(AppDbContext appDbContext)
         {
             _context = appDbContext;
+        }
+
+        public bool CourseExists(string numberclass)
+        {
+            return _context.Courses.Any(e => e.NumberClass == numberclass);
         }
 
         public bool StudentExists(string cpf)
@@ -16,16 +21,11 @@ namespace LanguageSchoolApi.Validators
             return _context.Students.Any(e => e.Cpf == cpf);
         }
 
-
-        public bool CourseExists(string numberClass)
-        {
-            return _context.Courses.Any(e => e.NumberClass == numberClass);
-        }
-
         public bool StudentAlreadyEnrolled(string cpfStudent, string numberClass)
         {
             return _context.Matriculates.Any(e => e.CpfStudent == cpfStudent && e.NumberClass == numberClass);
         }
+
         public bool MaximumLimitOfStudents(string numberclass)
         {
             var coursesCount = _context.Matriculates.LongCount(e => e.NumberClass == numberclass);
@@ -38,5 +38,6 @@ namespace LanguageSchoolApi.Validators
             return maximumLimitReached;
 
         }
+
     }
 }

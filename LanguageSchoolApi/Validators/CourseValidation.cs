@@ -15,12 +15,12 @@ namespace LanguageSchoolApi.Validators
             {
                 return _context.Courses.Any(e => e.Id == id);
             }
-        public bool CourseExistsNumberClass(string numberclass)
-        {
+            public bool CourseExistsNumberClass(string numberclass)
+            {
             return _context.Courses.Any(e => e.NumberClass == numberclass);
-        }
+            }
 
-        public bool ExistStudentsNoCourse(string numberclass)
+            public bool ExistStudentsNoCourse(string numberclass)
             {
                 return _context.Matriculates.Any(e => e.NumberClass == numberclass);
             }

@@ -86,7 +86,16 @@ namespace LanguageSchoolApi.Controllers
             {
                 return BadRequest("Turma da matricula não existe, por favor digitar o numero da turma correto.");
             }
+            else if (_studentValidation.StudentAlreadyEnrolled(student.CoursesMatriculates[0].CpfStudent, student.CoursesMatriculates[0].NumberClass))
+            {
+                return BadRequest("O Aluno ja está matriculado nessa turma.");
+            }
+            else if (_studentValidation.MaximumLimitOfStudents(student.CoursesMatriculates[0].NumberClass))
+            {
+                return BadRequest("Número maximo de alunos nessa turma atingido. Selecione outra turma e tente novamente.");
+            }
 
+            student.CoursesMatriculates[0].CpfStudent = student.Cpf;
 
             _context.Students.Add(student);
             await _context.SaveChangesAsync();

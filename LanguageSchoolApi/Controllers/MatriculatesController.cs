@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LanguageSchoolApi.Data;
 using LanguageSchoolApi.Models;
+using LanguageSchoolApi.Validators;
 
 namespace LanguageSchoolApi.Controllers
 {
@@ -16,10 +17,12 @@ namespace LanguageSchoolApi.Controllers
     public class MatriculatesController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly MatriculateValidation _matriculateValidation;
 
-        public MatriculatesController(AppDbContext context)
+        public MatriculatesController(AppDbContext context, MatriculateValidation matriculateValidation )
         {
             _context = context;
+            _matriculateValidation = matriculateValidation;
         }
 
         // GET: api/Matriculates
@@ -47,15 +50,18 @@ namespace LanguageSchoolApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Matriculate>> CreateMatriculate(Matriculate matriculate)
         {
-            if (!CourseExists(matriculate.NumberClass))
+            if (!_matriculateValidation.CourseExists(matriculate.NumberClass))
             {
                 return BadRequest("O curso da matricula não existe.");
-            }else if(!StudentExists(matriculate.CpfStudent))
+            }else if(!_matriculateValidation.StudentExists(matriculate.CpfStudent))
             {
                 return BadRequest("O Aluno da matricula não existe.");
-            }else if(!StudentAlreadyEnrolled(matriculate.CpfStudent, matriculate.CpfStudent))
+            }else if(_matriculateValidation.StudentAlreadyEnrolled(matriculate.CpfStudent, matriculate.NumberClass))
             {
                 return BadRequest("O Aluno ja está matriculado nessa turma.");
+            }else if (_matriculateValidation.MaximumLimitOfStudents(matriculate.NumberClass))
+            {
+                return BadRequest("Número maximo de alunos nessa turma atingido. Selecione outra turma e tente novamente.");
             }
 
 
@@ -79,21 +85,6 @@ namespace LanguageSchoolApi.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool CourseExists(string numberclass)
-        {
-            return _context.Courses.Any(e => e.NumberClass == numberclass);
-        }
-
-        private bool StudentExists(string cpf)
-        {
-            return _context.Students.Any(e => e.Cpf == cpf);
-        }
-
-        private bool StudentAlreadyEnrolled(string cpfStudent , string numberClass)
-        {
-            return _context.Matriculates.Any(e => e.CpfStudent == cpfStudent && e.NumberClass == numberClass);
         }
     }
 }
