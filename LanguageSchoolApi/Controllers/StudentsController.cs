@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LanguageSchoolApi.Data;
 using LanguageSchoolApi.Models;
+using LanguageSchoolApi.Validators;
 
 namespace LanguageSchoolApi.Controllers
 {
@@ -10,10 +11,12 @@ namespace LanguageSchoolApi.Controllers
     [ApiController]
     public class StudentsController : ControllerBase
     {
+        private readonly StudentValidation _studentValidation;
         private readonly AppDbContext _context;
 
-        public StudentsController(AppDbContext context)
+        public StudentsController(AppDbContext context, StudentValidation studentValidation)
         {
+            _studentValidation = studentValidation;
             _context = context;
         }
 
@@ -48,15 +51,21 @@ namespace LanguageSchoolApi.Controllers
                 return BadRequest();
             }
 
+
             _context.Entry(student).State = EntityState.Modified;
+            _context.Entry(student).Property(c => c.CoursesMatriculates).IsModified = false;
 
             try
             {
-                await _context.SaveChangesAsync();
+                if (_studentValidation.StudentExists(student.Cpf))
+                {
+                    return BadRequest("CPF ja cadastrado para outro aluno.");
+                }
+                    await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!StudentExists(student.Cpf))
+                if (!_studentValidation.StudentExists(student.Cpf))
                 {
                     return NotFound();
                 }
@@ -72,15 +81,15 @@ namespace LanguageSchoolApi.Controllers
         // POST: api/Students
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Student>> CreateStudent(Student student, Course course)
+        public async Task<ActionResult<Student>> CreateStudent(Student student)
         {
 
-            if (StudentExists(student.Cpf))
+            if (_studentValidation.StudentExists(student.Cpf))
             {
                 return BadRequest("CPF ja cadastrado para outro aluno.");
-            } else if (!ExistStudentsNoCourse(course.NumberClass))
+            } else if (!_studentValidation.CourseExists(student.CoursesMatriculates[0].NumberClass))
             {
-                return BadRequest("A Turma não existe");
+                return BadRequest("Turma da matricula não existe, por favor digitar o numero do turma correto.");
             }
 
             _context.Students.Add(student);
@@ -104,15 +113,6 @@ namespace LanguageSchoolApi.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool StudentExists(string cpf)
-        {
-            return _context.Students.Any(e => e.Cpf == cpf);
-        }
-        private bool ExistStudentsNoCourse(string numberclass)
-        {
-            return _context.Matriculates.Any(e => e.NumberClass == numberclass);
         }
     }
 }

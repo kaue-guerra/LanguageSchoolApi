@@ -45,14 +45,17 @@ namespace LanguageSchoolApi.Controllers
         // POST: api/Matriculates
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Matriculate>> CreateMatriculate([FromBody] Matriculate matriculate, [FromBody] Course course, [FromBody] Student student)
+        public async Task<ActionResult<Matriculate>> CreateMatriculate(Matriculate matriculate)
         {
-            if (!CourseExists(course.NumberClass))
+            if (!CourseExists(matriculate.NumberClass))
             {
                 return BadRequest("O curso da matricula não existe.");
-            }else if(!StudentExists(student.Cpf))
+            }else if(!StudentExists(matriculate.CpfStudent))
             {
                 return BadRequest("O Aluno da matricula não existe.");
+            }else if(!StudentAlreadyEnrolled(matriculate.CpfStudent, matriculate.CpfStudent))
+            {
+                return BadRequest("O Aluno ja está matriculado nessa turma.");
             }
 
 
@@ -86,6 +89,11 @@ namespace LanguageSchoolApi.Controllers
         private bool StudentExists(string cpf)
         {
             return _context.Students.Any(e => e.Cpf == cpf);
+        }
+
+        private bool StudentAlreadyEnrolled(string cpfStudent , string numberClass)
+        {
+            return _context.Matriculates.Any(e => e.CpfStudent == cpfStudent && e.NumberClass == numberClass);
         }
     }
 }
