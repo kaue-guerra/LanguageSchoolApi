@@ -1,5 +1,4 @@
 ﻿using LanguageSchoolApi.Data;
-using LanguageSchoolApi.Models;
 
 namespace LanguageSchoolApi.Validators
 {

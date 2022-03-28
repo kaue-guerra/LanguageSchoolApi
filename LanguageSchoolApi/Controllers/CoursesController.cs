@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LanguageSchoolApi.Data;
 using LanguageSchoolApi.Models;
+using LanguageSchoolApi.Validators;
 
 namespace LanguageSchoolApi.Controllers
 {
@@ -16,10 +17,12 @@ namespace LanguageSchoolApi.Controllers
     public class CoursesController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly CourseValidation _courseValidation;
 
-        public CoursesController(AppDbContext context)
+        public CoursesController(AppDbContext context, CourseValidation courseValidation)
         {
             _context = context;
+            _courseValidation = courseValidation;
         }
 
         // GET: api/Courses
@@ -61,7 +64,7 @@ namespace LanguageSchoolApi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CourseExists(id))
+                if (!_courseValidation.CourseExists(id))
                 {
                     return NotFound();
                 }
@@ -79,6 +82,10 @@ namespace LanguageSchoolApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Course>> PostCourse(Course course)
         {
+            if (_courseValidation.CourseExistsNumberClass(course.NumberClass))
+            {
+                return BadRequest("Já existe uma turma com esse número");
+            }
             _context.Courses.Add(course);
             await _context.SaveChangesAsync();
 
@@ -93,8 +100,8 @@ namespace LanguageSchoolApi.Controllers
             if (getCourse == null)
             {
                 return NotFound("Curso não pode ser deletado pois não existe no banco de dados");
-            
-            } else if (ExistStudentsNoCourse(course.NumberClass))
+
+            } else if (_courseValidation.ExistStudentsNoCourse(course.NumberClass))
             {
                 return BadRequest("Turma tem alunos matriculadas e por esse motivo não pode ser deletada.");
             }
@@ -103,16 +110,6 @@ namespace LanguageSchoolApi.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool CourseExists(int id)
-        {
-            return _context.Courses.Any(e => e.Id == id);
-        }
-
-        private bool ExistStudentsNoCourse(string numberclass)
-        {
-            return _context.Matriculates.Any(e=> e.NumberClass == numberclass);
         }
     }
 }
