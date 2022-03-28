@@ -6,8 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddControllers();
-builder.Services.AddScoped<StudentValidation>();
 builder.Services.AddScoped<CourseValidation>();
+builder.Services.AddScoped<MatriculateValidation>();
+builder.Services.AddScoped<StudentValidation>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
