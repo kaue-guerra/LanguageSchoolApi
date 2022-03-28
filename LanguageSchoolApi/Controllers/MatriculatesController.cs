@@ -25,14 +25,12 @@ namespace LanguageSchoolApi.Controllers
             _matriculateValidation = matriculateValidation;
         }
 
-        // GET: api/Matriculates
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Matriculate>>> GetMatriculates()
         {
             return await _context.Matriculates.ToListAsync();
         }
 
-        // GET: api/Matriculates/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Matriculate>> GetMatriculate(int id)
         {
@@ -45,8 +43,6 @@ namespace LanguageSchoolApi.Controllers
 
             return matriculate;
         }
-        // POST: api/Matriculates
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Matriculate>> CreateMatriculate(Matriculate matriculate)
         {
@@ -68,10 +64,9 @@ namespace LanguageSchoolApi.Controllers
             _context.Matriculates.Add(matriculate);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetMatriculate", new { id = matriculate.Id }, matriculate);
+            return CreatedAtAction("CreatedMatriculate", new { id = matriculate.Id }, matriculate);
         }
 
-        // DELETE: api/Matriculates/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMatriculate(int id)
         {
