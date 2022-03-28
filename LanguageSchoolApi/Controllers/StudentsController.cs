@@ -20,14 +20,12 @@ namespace LanguageSchoolApi.Controllers
             _context = context;
         }
 
-        // GET: api/Students
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
             return await _context.Students.ToListAsync();
         }
 
-        // GET: api/Students/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Student>> GetStudent(int id)
         {
@@ -35,14 +33,12 @@ namespace LanguageSchoolApi.Controllers
 
             if (student == null)
             {
-                return NotFound();
+                return NotFound("Aluno não encontrado.");
             }
 
             return student;
         }
-
-        // PUT: api/Students/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+       
         [HttpPut("{id}")]
         public async Task<IActionResult> EditStudent(int id, Student student)
         {
@@ -77,9 +73,7 @@ namespace LanguageSchoolApi.Controllers
 
             return NoContent();
         }
-
-        // POST: api/Students
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+       
         [HttpPost]
         public async Task<ActionResult<Student>> CreateStudent(Student student)
         {
@@ -87,19 +81,19 @@ namespace LanguageSchoolApi.Controllers
             if (_studentValidation.StudentExists(student.Cpf))
             {
                 return BadRequest("CPF ja cadastrado para outro aluno.");
-            } else if (!_studentValidation.CourseExists(student.CoursesMatriculates[0].NumberClass))
-            {
-                return BadRequest("Turma da matricula não existe, por favor digitar o numero do turma correto.");
             }
+            else if (!_studentValidation.CourseExists(student.CoursesMatriculates[0].NumberClass))
+            {
+                return BadRequest("Turma da matricula não existe, por favor digitar o numero da turma correto.");
+            }
+
 
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
-
-
-                return CreatedAtAction("GetStudent", new { id = student.Id }, student);
+            
+            return CreatedAtAction("CreateStudent", new { id = student.Id }, student);
         }
 
-        // DELETE: api/Students/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStudent(int id)
         {

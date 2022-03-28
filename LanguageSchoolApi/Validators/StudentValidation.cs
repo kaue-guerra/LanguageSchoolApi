@@ -22,6 +22,5 @@ namespace LanguageSchoolApi.Validators
         {
             return _context.Courses.Any(e => e.NumberClass == numberClass);
         }
-
     }
 }
